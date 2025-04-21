@@ -1,0 +1,43 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.9-node
+      - image: cimg/postgres:13.5
+        environment:
+          POSTGRES_USER: cmms_user
+          POSTGRES_DB: hvac_cmms
+          POSTGRES_PASSWORD: your_password
+    
+    steps:
+      - checkout
+      
+      # Set up Python environment
+      - run:
+          name: Install Python dependencies
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install -r hvac_cmms_backend/requirements.txt
+      
+      # Run backend tests
+      - run:
+          name: Run Django tests
+          command: |
+            . venv/bin/activate
+            cd hvac_cmms_backend
+            python manage.py test
+      
+      # Set up Node environment
+      - run:
+          name: Install Node.js dependencies
+          command: |
+            cd hvac-cmms-frontend
+            npm install
+      
+      # Build frontend
+      - run:
+          name: Build Vue.js frontend
+          command: |
+            cd hvac-cmms-frontend
+            npm run build
